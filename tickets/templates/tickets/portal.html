@@ -1,0 +1,572 @@
+
+<!DOCTYPE html><html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Command Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        select.status-dropdown option {
+            background-color: #111827;
+            color: #ffffff;
+        }
+        :root {
+            --bg-base: #090d16;
+            --card-bg: rgba(18, 24, 38, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --card-hover-border: rgba(99, 102, 241, 0.4);
+            --accent-primary: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.25);
+            --accent-emerald: #10b981;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f43f5e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding: 2.5rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .brand-title {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #fff 40%, #94a3b8);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .brand-badge {
+            font-size: 0.75rem;
+            font-family: 'JetBrains Mono', monospace;
+            padding: 0.25rem 0.6rem;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 9999px;
+            color: #a5b4fc;
+            -webkit-text-fill-color: initial;
+        }
+
+        .btn-launch {
+            background: linear-gradient(135deg, #4f46e5, #6366f1);
+            color: #fff;
+            border: none;
+            padding: 0.75rem 1.4rem;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 20px var(--accent-glow);
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-launch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .hud-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.25rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .hud-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hud-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .hud-total::before { background: var(--accent-primary); }
+        .hud-pending::before { background: var(--accent-amber); }
+        .hud-progress::before { background: #38bdf8; }
+        .hud-resolved::before { background: var(--accent-emerald); }
+
+        .hud-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .hud-value {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 420px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: rgba(18, 24, 38, 0.6);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem 0.75rem 2.5rem;
+            color: var(--text-main);
+            outline: none;
+            font-size: 0.9rem;
+            transition: border 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-primary);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .ticket-stream {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .ticket-item {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.4rem;
+            backdrop-filter: blur(10px);
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            transition: all 0.2s ease;
+        }
+
+        .ticket-item:hover {
+            border-color: var(--card-hover-border);
+            transform: translateX(4px);
+        }
+
+        .ticket-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            color: #fff;
+        }
+
+        .ticket-desc {
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 0.8rem;
+            max-width: 800px;
+        }
+
+        .ticket-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            font-size: 0.78rem;
+            color: #64748b;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge {
+            padding: 0.25rem 0.65rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .badge-High, .badge-Critical { background: rgba(244, 63, 94, 0.15); color: #fb7185; border: 1px solid rgba(244, 63, 94, 0.3); }
+        .badge-Medium { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-Low { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+        .status-pill {
+            padding: 0.3rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .status-pill::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-Pending { background: rgba(245, 158, 11, 0.1); color: #fbbf24; }
+        .status-Pending::before { background: #fbbf24; box-shadow: 0 0 6px #fbbf24; }
+
+        .status-Resolved { background: rgba(16, 185, 129, 0.1); color: #34d399; }
+        .status-Resolved::before { background: #34d399; box-shadow: 0 0 6px #34d399; }
+
+        .drawer-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: flex-end;
+            z-index: 1000;
+        }
+
+        .drawer-overlay.active {
+            display: flex;
+        }
+
+        .drawer-content {
+            background: #0d121f;
+            border-left: 1px solid var(--card-border);
+            width: 100%;
+            max-width: 520px;
+            height: 100%;
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            animation: slideIn 0.25s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+
+        .drawer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #cbd5e1;
+        }
+
+        .glass-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--card-border);
+            border-radius: 10px;
+            padding: 0.8rem 1rem;
+            color: #fff;
+            outline: none;
+            font-size: 0.92rem;
+            transition: all 0.2s;
+        }
+
+        .glass-input:focus {
+            border-color: var(--accent-primary);
+            background: rgba(255, 255, 255, 0.07);
+        }
+
+        .glass-select {
+            cursor: pointer;
+        }
+
+        .glass-select option {
+            background: #0d121f;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <div>
+            <h1 class="brand-title">
+                Support Command Center
+                <span class="brand-badge">LIVE MONITOR</span>
+            </h1>
+            <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.25rem;">
+                Incident management and operational support triage
+            </p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <a href="/admin/" style="text-decoration: none;">
+                <button type="button" class="btn-launch" style="background: rgba(255,255,255,0.06); box-shadow: none; border: 1px solid var(--card-border);">
+                    Admin Panel &rarr;
+                </button>
+            </a>
+            <button class="btn-launch" onclick="toggleDrawer(true)">
+                <span>+</span> Raise New Ticket
+            </button>
+        </div>
+    </header>
+
+    <section class="hud-grid">
+        <div class="hud-card hud-total">
+            <div class="hud-label">Total Incidents</div>
+            <div class="hud-value" id="count-total">{{ stats.total }}</div>
+        </div>
+        <div class="hud-card hud-pending">
+            <div class="hud-label">Awaiting Triage</div>
+            <div class="hud-value" id="count-pending">{{ stats.pending }}</div>
+        </div>
+        <div class="hud-card hud-progress">
+            <div class="hud-label">In Progress</div>
+            <div class="hud-value" id="count-inprogress">{{ stats.in_progress }}</div>
+        </div>
+        <div class="hud-card hud-resolved">
+            <div class="hud-label">Resolved</div>
+            <div class="hud-value" id="count-resolved">{{ stats.resolved }}</div>
+        </div>
+    </section>
+
+    <section class="controls-bar">
+        <div class="search-box">
+            <span class="search-icon">&#128269;</span>
+            <input type="text" id="ticketSearch" placeholder="Filter by title, description..." onkeyup="filterTickets()">
+        </div>
+    </section>
+
+    <main class="ticket-stream" id="ticketContainer">
+        {% for ticket in tickets %}
+       <article class="ticket-item" style="display: flex; justify-content: space-between; align-items: flex-start;">
+    (<!-- Left Side: Title & Description -->)
+    <div style="flex: 1; margin-right: 1.5rem;">
+        <h3 style="color: #ffffff; margin: 0 0 6px 0; font-size: 1.1rem; font-weight: 600;">
+            {{ ticket.title }}
+        </h3>
+        <p style="color: rgba(255, 255, 255, 0.75); margin: 0; font-size: 0.9rem; line-height: 1.4;">
+            {{ ticket.description }}
+        </p>
+    </div>
+
+    <!-- Right Side: Priority Badge & Timestamp -->
+    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+        <span class="badge badge-{{ ticket.priority }}">{{ ticket.priority }}</span>
+        <span style="font-size: 0.75rem; color: rgba(255, 255, 255, 0.6); margin-top: 4px;">
+        {{ ticket.created_at|date:"M d, H:i" }}
+        </span>
+    {% if is_staff %}
+        <!-- Quick-Action Status Controls for Staff -->
+    <form method="POST" action="{% url 'update_status' ticket.id %}" style="display: inline;">
+    {% csrf_token %}
+    <select name="status" class="glass-input status-dropdown" data-url="{% url 'update_status' ticket.id %}">
+    <option value="Pending" {% if ticket.status == 'Pending' %}selected{% endif %}>Pending</option>
+    <option value="In Progress" {% if ticket.status == 'In Progress' %}selected{% endif %}>In Progress</option>
+    <option value="Resolved" {% if ticket.status == 'Resolved' %}selected{% endif %}>Resolved</option>
+</select>
+</form>
+    {% else %}
+        <!-- Standard Pill for Regular Customers -->
+        <span class="status-pill status-{{ ticket.status }}">{{ ticket.status }}</span>
+    {% endif %}
+</div>
+        </article>
+        {% empty %}
+        <div style="text-align: center; padding: 4rem 1rem; color: var(--text-muted); background: var(--card-bg); border-radius: 16px; border: 1px dashed var(--card-border);">
+            No support tickets active. Click <strong>+ Raise New Ticket</strong> to submit an incident.
+        </div>
+        {% endfor %}
+    </main>
+</div>
+
+<div class="drawer-overlay" id="drawerOverlay" onclick="handleBackdropClick(event)">
+    <div class="drawer-content">
+        <div class="drawer-header">
+            <div>
+                <h2 style="font-size: 1.3rem; font-weight: 700;">Create Support Incident</h2>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.2rem;">Dispatch a new ticket to our operations team</p>
+            </div>
+            <button class="btn-close" onclick="toggleDrawer(false)">&times;</button>
+        </div>
+
+        <form method="POST" action="">
+            {% csrf_token %}
+            <div class="form-group">
+                <label>Incident Summary / Title</label>
+                {{ form.title }}
+            </div>
+            <div class="form-group">
+                <label>Priority Level</label>
+                {{ form.priority }}
+            </div>
+            <div class="form-group">
+                <label>Detailed Diagnostics</label>
+                {{ form.description }}
+            </div>
+            <button type="submit" class="btn-launch" style="width: 100%; justify-content: center; margin-top: 1rem; padding: 0.9rem;">
+                Submit Incident to Queue &rarr;
+            </button>
+        </form>
+    </div>
+</div>
+
+<script>
+    function toggleDrawer(open) {
+        const overlay = document.getElementById('drawerOverlay');
+        overlay.classList.toggle('active', open);
+    }
+
+    function handleBackdropClick(e) {
+        if (e.target.id === 'drawerOverlay') {
+            toggleDrawer(false);
+        }
+    }
+
+    function filterTickets() {
+        const query = document.getElementById('ticketSearch').value.toLowerCase();
+        const tickets = document.querySelectorAll('.ticket-item');
+        
+        tickets.forEach(ticket => {
+            const text = ticket.innerText.toLowerCase();
+            ticket.style.display = text.includes(query) ? 'grid' : 'none';
+        });
+    }
+</script>
+
+</body>
+</html>
+<script>
+    const searchInput = document.getElementById('ticketSearch');
+    const ticketCards = document.querySelectorAll('.ticket-item');
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            const query = this.value.toLowerCase().trim();
+
+            ticketCards.forEach(card => {
+                const text = card.textContent.toLowerCase();
+                card.style.display = text.includes(query) ? '' : 'none';
+            });
+        });
+    }
+</script>
+<script>
+document.addEventListener('change', function(e) {
+    // Only target the specific dropdown that was clicked
+    if (e.target && e.target.classList.contains('status-dropdown')) {
+        const dropdown = e.target;
+        const form = dropdown.closest('form');
+        const url = dropdown.getAttribute('data-url');
+        const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+        const selectedStatus = dropdown.value;
+
+        const formData = new FormData();
+        formData.append('status', selectedStatus);
+
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrfToken
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                console.log("Full data received:", data);
+                console.log("In progress count is:", data.counts.in_progress);
+                console.log("Target element found:", document.getElementById('count-inprogress'));
+                // Update HUD metrics
+                const totalEl = document.getElementById('count-total');
+                const pendingEl = document.getElementById('count-pending');
+                const progressEl = document.getElementById('count-inprogress');
+                const resolvedEl = document.getElementById('count-resolved');
+
+                if (totalEl) totalEl.textContent = data.counts.total;
+                if (pendingEl) pendingEl.textContent = data.counts.pending;
+                if (progressEl) progressEl.textContent = data.counts.in_progress;
+                if (resolvedEl) resolvedEl.textContent = data.counts.resolved;
+            }
+        })
+        .catch(err => console.error('Status update failed:', err));
+    }
+});
+</script>
