@@ -58,9 +58,9 @@ def update_status(request, ticket_id):
 
         # Recalculate HUD counts
         total = Ticket.objects.count()
-        pending = Ticket.objects.filter(status='Pending').count()
-        in_progress = Ticket.objects.filter(status='In Progress').count()
-        resolved = Ticket.objects.filter(status='Resolved').count()
+        pending = Ticket.objects.filter(status='Pending').count(),
+        in_progress = Ticket.objects.filter(status='In Progress').count(),
+        resolved = Ticket.objects.filter(status='Resolved').count(),
 
         return JsonResponse({
             'success': True,
